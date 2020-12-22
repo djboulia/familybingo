@@ -63,6 +63,19 @@ const newCard = function (topic) {
     return cardData;
 };
 
+// create the game with the players and cards
+
+const game = {
+    name: 'SuperBowl Test 2',
+    startDate: new Date().toString(),
+    endDate: new Date().toString(),
+    players: [],
+    complete: false,
+    activeRound: 0,
+    totalRounds: 2,
+    rounds: []
+};
+
 // get all players
 Players.getAll()
     .then((players) => {
@@ -73,6 +86,7 @@ Players.getAll()
     })
     .then((topic) => {
         results.topic = topic;
+        game.topic = topic.id;
 
         // create bingo cards for each player
         const promises = [];
@@ -87,25 +101,58 @@ Players.getAll()
         return Promise.all(promises);
     })
     .then((cards) => {
-        // create the game with the players and cards
 
-        const game = {
-            name: 'SuperBowl Test',
-            startDate: new Date().toString(),
-            endDate: new Date().toString(),
-            topic: results.topic.id,
-            players: []
-        }
+        const round = [];
 
         for (let i = 0; i < cards.length; i++) {
             const player = cards[i].player;
             const card = cards[i].card;
 
-            game.players.push({
-                id: player.id,
+            round.push({
+                user: player.id,
                 card: card.id
             })
         }
+
+        game.rounds.push(round);
+
+        // create bingo cards for each player
+        const topic = results.topic;
+        const promises = [];
+        const players = results.players;
+
+        for (let i = 0; i < players.length; i++) {
+            const player = players[i];
+
+            promises.push(createCard(player, newCard(topic)));
+        }
+
+        return Promise.all(promises);
+    })
+    .then((cards) => {
+
+        const players = results.players;
+        for (let i = 0; i < players.length; i++) {
+            const player = players[i];
+            const playerId = player.id;
+
+            game.players.push(playerId)
+        }
+
+
+        const round = [];
+
+        for (let i = 0; i < cards.length; i++) {
+            const player = cards[i].player;
+            const card = cards[i].card;
+
+            round.push({
+                user: player.id,
+                card: card.id
+            })
+        }
+
+        game.rounds.push(round);
 
         return Games.create(game);
     })

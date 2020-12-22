@@ -19,9 +19,9 @@ export default function Card(props) {
     const gameid = props.match.params.id;
     console.log('params ', gameid);
 
-    BingoApi.card(gameid)
-      .then((card) => {
-        setCard(card);
+    BingoApi.cards(gameid)
+      .then((cards) => {
+        setCard(cards[0]);
         setHasLoaded(true);
       })
       .catch((e) => {
@@ -41,9 +41,9 @@ export default function Card(props) {
 
     const gameid = props.match.params.id;
 
-    const cell = card[row][col];
+    const cell = card.rows[row][col];
     cell.selected = !cell.selected;
-    card[row][col] = cell;
+    card.rows[row][col] = cell;
 
     BingoApi.cardUpdate(gameid, card)
       .then((card) => {
@@ -69,7 +69,7 @@ export default function Card(props) {
 
       <Title>Bingo Card for {name}</Title>
 
-      <BingoCard card={card} onClick={handleClick} />
+      <BingoCard card={card.rows} onClick={handleClick} />
 
     </Dashboard>
   );

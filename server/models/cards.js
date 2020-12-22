@@ -135,7 +135,10 @@ module.exports = {
 
             fileDB.getById(id)
                 .then((card) => {
-                    resolve(updateBingoCard(card.rows));
+                    resolve({
+                        id: id,
+                        rows: updateBingoCard(card.rows)
+                    });
                     return;
                 })
                 .catch((e) => {
@@ -153,7 +156,10 @@ module.exports = {
                 rows: getCardData(card.rows)
             })
                 .then((card) => {
-                    resolve(updateBingoCard(card.rows));
+                    resolve({
+                        id: card.id,
+                        rows: updateBingoCard(card.rows)
+                    });
                 })
                 .catch((e) => {
                     reject(e);

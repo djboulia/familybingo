@@ -1,11 +1,15 @@
 import React from 'react';
 import { LinearProgress } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
 import Alert from '@material-ui/lab/Alert';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Button from '@material-ui/core/Button';
 import Title from './Title';
 import Dashboard from './Dashboard';
 import BingoApi from './server/BingoApi';
-import BingoCardSmall from './bingocards/BingoCardSmall';
 
 export default function Game(props) {
   const [hasLoaded, setHasLoaded] = React.useState(false);
@@ -37,19 +41,50 @@ export default function Game(props) {
     return <LinearProgress></LinearProgress>
   }
 
+  const activeRound = game.activeRound;
+  const rounds = [];
+  for (let i = 0; i < game.totalRounds; i++) {
+    rounds.push({
+      id: i,
+      round: i + 1,
+      status: (game.complete) ? 'Complete' : (i < activeRound) ? 'Complete' : (i === activeRound) ? 'Active' : 'Not Started',
+    })
+  }
+
   return (
     <Dashboard>
 
       <Title>Game Summary for {name}</Title>
 
-      <Grid container justify="center" spacing={2}>
-        {game.players.map((player) => (
-          <Grid key={player.id} item>
-            <BingoCardSmall player={player} />
-          </Grid>
-        ))}
-      </Grid>
+      <Table size="small">
 
+        <TableHead>
+          <TableRow>
+            <TableCell>Round</TableCell>
+            <TableCell align='center'>Status</TableCell>
+            <TableCell align='center'>View</TableCell>
+          </TableRow>
+        </TableHead>
+
+        <TableBody>
+          {rounds.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell>
+                {row.round}
+              </TableCell>
+              <TableCell align='center'>
+                {row.status}
+              </TableCell>
+              <TableCell align='center'>
+                <Button color='primary' disabled={row.status === 'Not Started'} variant='contained' href={'/game/' + game.id + '/round/' + row.id}>
+                  View Round
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+
+      </Table>
     </Dashboard>
   );
 }

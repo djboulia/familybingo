@@ -58,6 +58,7 @@ const bingoSquare = function (el) {
 export default function BingCardSmall(props) {
   const classes = useStyles();
   const player = props.player;
+  const card = player.card;
 
   return (
     <Table key={player.id} className={classes.bingoTable}>
@@ -76,7 +77,7 @@ export default function BingCardSmall(props) {
       </TableHead>
 
       <TableBody>
-        {player.rows.map((row, index) => {
+        {card.rows.map((row, index) => {
 
           return (
             <TableRow key={index}>

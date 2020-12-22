@@ -59,6 +59,7 @@ export default function Games() {
         <TableHead>
           <TableRow>
             <TableCell>Game</TableCell>
+            <TableCell>Status</TableCell>
             <TableCell align='center'>View</TableCell>
             <TableCell align='center'>View</TableCell>
           </TableRow>
@@ -69,6 +70,9 @@ export default function Games() {
             <TableRow key={row.id}>
               <TableCell>
                 {row.name}
+              </TableCell>
+              <TableCell>
+                {(row.complete) ? 'Complete' : 'In Progress'}
               </TableCell>
               <TableCell align='center'>
                 <Button color='primary' variant='contained' href={'/game/' + row.id + '/card'}>

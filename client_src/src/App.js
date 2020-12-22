@@ -6,6 +6,7 @@ import {
   Redirect,
 } from "react-router-dom";
 
+import Round from './Round';
 import Games from './Games';
 import Game from './Game';
 import Card from './Card';
@@ -43,6 +44,7 @@ export default function App() {
             <Route exact path="/login" component={Login} />
             <PrivateRoute exact path="/" component={Games} />
             <PrivateRoute exact path="/game/:id" component={Game} />
+            <PrivateRoute exact path="/game/:id/round/:roundid" component={Round} />
             <PrivateRoute exact path="/game/:id/card" component={Card} />
             <PrivateRoute exact path="/logout" component={Logout} />
           </Switch>

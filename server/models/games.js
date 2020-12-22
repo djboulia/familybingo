@@ -22,24 +22,36 @@ module.exports = {
         })
     },
 
-    getCardId: function (gameid, userid) {
+    /**
+     * Get all of the cards for this user in this game
+     * 
+     * @param {String} gameid 
+     * @param {String} userid 
+     */
+    getAllCardIds: function (gameid, userid) {
         return new Promise((resolve, reject) => {
 
             fileDB.getById(gameid)
                 .then((game) => {
-                    const players = game.players;
 
-                    for (let j = 0; j < players.length; j++) {
-                        const player = players[j];
+                    const rounds = game.rounds;
+                    const result = [];
 
-                        if (player.id === userid) {
-                            const cardid = player.card;
-                            resolve(cardid);
-                            return;
+                    for (let i=0; i<rounds.length; i++) {
+                        const round = rounds[i];
+                        result[i] = undefined;
+
+                        for (let j = 0; j < round.length; j++) {
+                            const card = round[j];
+    
+                            if (card.user === userid) {
+                                const cardid = card.card;
+                                result[i] = cardid;
+                            }
                         }
                     }
 
-                    reject('no card found for ' + userid);
+                    resolve(result);
                 })
                 .catch((e) => {
                     reject(e);
@@ -59,12 +71,13 @@ module.exports = {
                         const players = game.players;
 
                         for (let j = 0; j < players.length; j++) {
-                            const player = players[j];
+                            const playerId = players[j];
 
-                            if (player.id === id) {
+                            if (playerId === id) {
                                 result.push({
                                     id: game.id,
-                                    name: game.name
+                                    name: game.name,
+                                    complete: game.complete
                                 });
                                 break;
                             }
@@ -79,6 +92,20 @@ module.exports = {
 
         })
     },
+
+    update: function (game) {
+        return new Promise((resolve, reject) => {
+
+            fileDB.update(game)
+                .then((game) => {
+                    resolve(game);
+                })
+                .catch((e) => {
+                    reject(e);
+                })
+        })
+    },
+
     create: function (gameData) {
         return new Promise((resolve, reject) => {
 

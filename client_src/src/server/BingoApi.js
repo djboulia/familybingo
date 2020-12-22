@@ -145,18 +145,46 @@ const BingoApi = {
         })
     },
 
-    card(id) {
+    /**
+     * Get summary information for a specific round in the game
+     * 
+     * @param {String} id 
+     * @param {String} roundId 
+     */
+    round(id, roundId) {
         return new Promise((resolve, reject) => {
 
             axios
-                .get('/api/bingo/user/me/game/' + id + '/card')
+                .get('/api/bingo/game/' + id + '/round/' + roundId)
                 .then(res => {
                     console.log(res);
                     console.log(res.data);
 
                     const result = res.data;
                     if (result.status) {
-                        resolve(result.card);
+                        resolve(result.game);
+                    } else {
+                        reject(result.msg);
+                    }
+                })
+                .catch((e) => {
+                    reject(e);
+                })
+        })
+    },
+
+    cards(id) {
+        return new Promise((resolve, reject) => {
+
+            axios
+                .get('/api/bingo/user/me/game/' + id + '/cards')
+                .then(res => {
+                    console.log(res);
+                    console.log(res.data);
+
+                    const result = res.data;
+                    if (result.status) {
+                        resolve(result.cards);
                     } else {
                         reject(result.msg);
                     }
@@ -168,10 +196,12 @@ const BingoApi = {
     },
 
     cardUpdate(id, card) {
+        const cardid = card.id;
+
         return new Promise((resolve, reject) => {
 
             axios
-                .post('/api/bingo/user/me/game/' + id + '/card', card)
+                .post('/api/bingo/user/me/game/' + id + '/card/' + cardid, card)
                 .then(res => {
                     console.log(res);
                     console.log(res.data);
