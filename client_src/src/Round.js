@@ -2,6 +2,7 @@ import React from 'react';
 import { LinearProgress } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Alert from '@material-ui/lab/Alert';
+import Button from '@material-ui/core/Button';
 import Title from './Title';
 import Dashboard from './Dashboard';
 import BingoApi from './server/BingoApi';
@@ -13,15 +14,16 @@ export default function Round(props) {
   const [name, setName] = React.useState("");
   const [game, setGame] = React.useState({});
 
+  const gameId = props.match.params.id;
+  const roundId = props.match.params.roundid;
+
   React.useEffect(() => {
     const user = BingoApi.getUser();
     setName(user.name);
 
-    const id = props.match.params.id;
-    const roundId = props.match.params.roundid;
-    console.log('params ' + id + ' round ' + roundId);
+    console.log('params ' + gameId + ' round ' + roundId);
 
-    BingoApi.round(id, roundId)
+    BingoApi.round(gameId, roundId)
       .then((game) => {
         setName(game.name);
         setGame(game);
@@ -44,9 +46,27 @@ export default function Round(props) {
   return (
     <Dashboard>
 
-      <Title>Game Summary for {name}</Title>
+      <Title>Game Summary for {name}  (Round {Number(roundId) +1})</Title>
 
       <Grid container justify="center" spacing={2}>
+      <Grid item xs={6}
+          style={{
+            textAlign: 'center' // this does the magic
+          }}>
+          <Button color='secondary' variant='contained' href={'/games/' + gameId + '/cards/round/' + roundId}>
+            View My Card
+            </Button>
+        </Grid>
+
+        <Grid item xs={6}
+          style={{
+            textAlign: 'center' // this does the magic
+          }}>
+          <Button color='secondary' variant='contained' href={'/games/' + gameId}>
+            Return to Game
+        </Button>
+        </Grid>
+
         {game.players.map((player) => (
           <Grid key={player.id} item>
             <BingoCardSmall player={player} />

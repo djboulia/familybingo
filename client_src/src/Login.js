@@ -7,33 +7,35 @@ import Dashboard from './Dashboard';
 import Title from './Title';
 import BingoApi from './server/BingoApi';
 
-const statusMsg = (msg) => {
-  <Alert severity="info">{msg}</Alert>
+const statusAlert = (msg) => {
+  return <Alert severity="info">{msg}</Alert>
 }
 
-const errorMsg = (msg) => {
+const errorAlert = (msg) => {
   return <Alert severity="error">{msg}</Alert>
 }
 
 export default function Login(props) {
   const [redirectToReferrer, setRedirectToReferrer] = React.useState(false);
-  const [msg, setMsg] = React.useState(statusMsg("Please log in."));
+  const [statusMsg, setStatusMsg] = React.useState('Please log in.');
+  const [errorMsg, setErrorMsg] = React.useState(undefined);
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
 
   const loginDisabled = username === "" || password === "";
 
   const login = function () {
-    BingoApi
-      .login(username, password)
+    BingoApi.login(username, password)
       .then((result) => {
         console.log("login result " + result.status);
 
-        setMsg((result.status) ?
-          statusMsg(result.msg) :
-          errorMsg(result.msg));
+        setStatusMsg(result.msg);
 
         setRedirectToReferrer(result.status);
+      })
+      .catch((e) => {
+        console.log('Error ' + e);
+        setErrorMsg(e);
       })
   }
 
@@ -67,6 +69,8 @@ export default function Login(props) {
     console.log("Redirecting to : " + from.pathname);
     return <Redirect to={from} />
   }
+
+  const msg = (errorMsg) ? errorAlert(errorMsg) : statusAlert(statusMsg);
 
   return (
     <Dashboard>

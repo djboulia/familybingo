@@ -63,6 +63,7 @@ export default function Game(props) {
             <TableCell>Round</TableCell>
             <TableCell align='center'>Status</TableCell>
             <TableCell align='center'>View</TableCell>
+            <TableCell align='center'>View</TableCell>
           </TableRow>
         </TableHead>
 
@@ -76,7 +77,12 @@ export default function Game(props) {
                 {row.status}
               </TableCell>
               <TableCell align='center'>
-                <Button color='primary' disabled={row.status === 'Not Started'} variant='contained' href={'/game/' + game.id + '/round/' + row.id}>
+                <Button color='primary' disabled={row.status === 'Not Started'} variant='contained' href={'/games/' + game.id + '/cards/round/' + row.id}>
+                  My Card
+                </Button>
+              </TableCell>
+              <TableCell align='center'>
+                <Button color='primary' disabled={row.status === 'Not Started'} variant='contained' href={'/games/' + game.id + '/round/' + row.id}>
                   View Round
                 </Button>
               </TableCell>

@@ -13,6 +13,9 @@
 /client_src/node_modules
 /client_src/build
 
+# don't include test data
+/server/testdata
+
 # IDEs and editors
 /.idea
 /.vscode

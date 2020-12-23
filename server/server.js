@@ -14,7 +14,6 @@ require("dotenv").config();
 var Players = require('./models/players');
 var Games = require('./models/games');
 var Cards = require('./models/cards');
-const { promises } = require('fs');
 
 var client_url = (process.env.CLIENT_URL) ? process.env.CLIENT_URL : ""; // 'http://localhost:3000';
 var server_url = (process.env.SERVER_URL) ? process.env.SERVER_URL : ""; // 'http://localhost:8888';
@@ -54,11 +53,18 @@ app.post('/api/login', function (req, res) {
             req.session.user = result;
 
             res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify(result));
+            res.end(JSON.stringify({
+                status: true,
+                msg: 'success',
+                user: result
+            }));
         })
         .catch((err) => {
             res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify(err));
+            res.end(JSON.stringify({
+                status: false,
+                msg: err
+            }));
         })
 });
 
@@ -153,6 +159,56 @@ app.get('/api/bingo/user/me/game/:gameid/cards', function (req, res) {
                 status: true,
                 msg: 'success',
                 cards: cards
+            }));
+        })
+        .catch((e) => {
+            console.log('error: ', e);
+
+            const err = {
+                status: false,
+                msg: e
+            }
+
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(err));
+        })
+});
+
+/**
+ * get a specific user's card for a specific round
+ */
+app.get('/api/bingo/user/me/game/:gameid/cards/round/:roundid', function (req, res) {
+    const gameId = req.params.gameid;
+    const roundId = req.params.roundid;
+    const user = req.session.user;
+
+    if (!user) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+            status: false,
+            msg: 'Not logged in.'
+        }));
+        return;
+    }
+
+    console.log('found game id ' + gameId + ' and round id ' + roundId);
+
+    Games.getAllCardIds(gameId, user.id)
+        .then((results) => {
+
+            if (roundId >= results.length) {
+                throw 'Invalid round id!';
+            }
+
+            const cardId = results[roundId];
+            return Cards.getById(cardId);
+        })
+        .then((card) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+                status: true,
+                msg: 'success',
+                cards: card
             }));
         })
         .catch((e) => {

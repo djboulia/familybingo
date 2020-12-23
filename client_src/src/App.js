@@ -43,9 +43,9 @@ export default function App() {
           <Switch>
             <Route exact path="/login" component={Login} />
             <PrivateRoute exact path="/" component={Games} />
-            <PrivateRoute exact path="/game/:id" component={Game} />
-            <PrivateRoute exact path="/game/:id/round/:roundid" component={Round} />
-            <PrivateRoute exact path="/game/:id/card" component={Card} />
+            <PrivateRoute exact path="/games/:id" component={Game} />
+            <PrivateRoute exact path="/games/:id/round/:roundid" component={Round} />
+            <PrivateRoute exact path="/games/:id/cards/round/:roundid" component={Card} />
             <PrivateRoute exact path="/logout" component={Logout} />
           </Switch>
       </Router>

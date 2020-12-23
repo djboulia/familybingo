@@ -61,7 +61,6 @@ export default function Games() {
             <TableCell>Game</TableCell>
             <TableCell>Status</TableCell>
             <TableCell align='center'>View</TableCell>
-            <TableCell align='center'>View</TableCell>
           </TableRow>
         </TableHead>
 
@@ -75,13 +74,8 @@ export default function Games() {
                 {(row.complete) ? 'Complete' : 'In Progress'}
               </TableCell>
               <TableCell align='center'>
-                <Button color='primary' variant='contained' href={'/game/' + row.id + '/card'}>
-                  My Card
-                </Button>
-              </TableCell>
-              <TableCell align='center'>
-                <Button color='primary' variant='contained' href={'/game/' + row.id}>
-                  All Players
+                <Button color='primary' variant='contained' href={'/games/' + row.id}>
+                  View Game
                 </Button>
               </TableCell>
             </TableRow>

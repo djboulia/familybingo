@@ -30,19 +30,7 @@ const BingoApi = {
     },
 
     getUser() {
-        let user = {
-            name: undefined,
-            username: undefined
-        };
-
-        const data = Session.getSessionData();
-
-        console.log('session data ', data);
-
-        if (data) {
-            user.name = data.name;
-            user.username = data.username;
-        }
+        const user = Session.getUser();
 
         console.log("returning user " + JSON.stringify(user));
         return user;
@@ -59,17 +47,26 @@ const BingoApi = {
             }).then(res => {
                 console.log('login: ', res);
 
-                const name = res.data.name;
-                const token = res.data.token;
-                const ttl = res.data.ttl;
+                const result = res.data;
+                if (result.status) {
+                    const user = result.user;
 
-                Session.create(name, userid, token, ttl);
+                    const name = user.name;
+                    const token = user.token;
+                    const admin = (user.admin) ? true : false;
+                    const ttl = user.ttl;
+    
+                    Session.create(name, userid, admin, token, ttl);
+    
+                    resolve(res.data);
+                } else {
+                    console.log('Error: ' + result.msg);
+                    reject(result.msg);
+                }
 
-                resolve(res.data);
             }).catch((e) => {
                 console.log("error: " + JSON.stringify(e.response));
-
-                resolve("error");
+                reject(e.response);
             })
         })
     },
@@ -178,6 +175,28 @@ const BingoApi = {
 
             axios
                 .get('/api/bingo/user/me/game/' + id + '/cards')
+                .then(res => {
+                    console.log(res);
+                    console.log(res.data);
+
+                    const result = res.data;
+                    if (result.status) {
+                        resolve(result.cards);
+                    } else {
+                        reject(result.msg);
+                    }
+                })
+                .catch((e) => {
+                    reject(e);
+                })
+        })
+    },
+
+    card(id, roundId) {
+        return new Promise((resolve, reject) => {
+
+            axios
+                .get('/api/bingo/user/me/game/' + id + '/cards/round/' + roundId)
                 .then(res => {
                     console.log(res);
                     console.log(res.data);

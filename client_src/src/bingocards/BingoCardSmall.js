@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   bingoTitle: {
     maxWidth: `${cardWidth}px`,
     color: 'white',
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: theme.palette.bingoCard.header,
     padding: '10px',
     borderTopLeftRadius: '10px',
     borderTopRightRadius: '10px',
@@ -31,11 +31,12 @@ const useStyles = makeStyles((theme) => ({
   bingoHeader: {
     textAlign: 'center',
     color: 'white',
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: theme.palette.bingoCard.header,
     border: '0px',
     padding: '0px',
   },
   bingoCell: {
+    color: theme.palette.bingoCard.selected,
     width: `${cardWidth / 5}px`,
     height: `${cardWidth / 5}px`,
     textAlign: 'center',
@@ -43,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
     padding: '0px',
   },
   bingoHighlight: {
-    backgroundColor: 'yellow',
+    backgroundColor: theme.palette.bingoCard.bingo,
   },
 }));
 
@@ -51,7 +52,7 @@ const bingoSquare = function (el) {
   const classes = useStyles();
 
   return (
-    <TableCell className={clsx(classes.bingoCell, el.bingo && classes.bingoHighlight)}>{(el.freeSpace) ? <Star color='primary' /> : (el.selected) ? <Circle color='secondary' /> : ''}</TableCell>
+    <TableCell className={clsx(classes.bingoCell, el.bingo && classes.bingoHighlight)}>{(el.freeSpace) ? <Star /> : (el.selected) ? <Circle /> : ''}</TableCell>
   )
 }
 

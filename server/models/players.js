@@ -32,10 +32,7 @@ module.exports = {
     },
 
     authenticate: function (userid, password) {
-        const err = {
-            status: false,
-            msg: 'Invalid userid or password'
-        };
+        const err = 'Invalid userid or password';
 
         return new Promise((resolve, reject) => {
             if (!userid || !password) {
@@ -56,10 +53,9 @@ module.exports = {
                     const result = {
                         name: player.name,
                         id: player.id,
+                        admin: player.admin,
                         token: 'Dummy_Token',
-                        ttl: 3600 * 1000,       // 1 hour
-                        status: true,
-                        msg: 'success'
+                        ttl: 3600 * 1000       // 1 hour
                     };
                     resolve(result);
                 })

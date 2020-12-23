@@ -18,13 +18,15 @@ const Session = {
      * 
      * @param {String} name human readable name for this user
      * @param {String} username golfer id for this user on the ForeTees site
+     * @param {Boolean} admin is this user an admin
      * @param {String} token session token
      * @param {Integer} ttl time to live in millisecs
      */
-    create(name, username, token, ttl) {
+    create(name, username, admin, token, ttl) {
       const data = {
         name: name,
         username: username,
+        admin: admin,
         token: token,
         expires: new Date().getTime() + ttl,
         user: {},
@@ -123,13 +125,16 @@ const Session = {
     getUser() {
       let user = {
         name: undefined,
-        username: undefined
+        username: undefined,
+        admin: false
       };
+      
       const data = this.getSessionData();
   
       if (data) {
         user.name = data.name;
         user.username = data.username;
+        user.admin = data.admin;
       }
   
       console.log("returning user " + JSON.stringify(user));
