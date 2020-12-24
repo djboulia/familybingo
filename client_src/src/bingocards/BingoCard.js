@@ -8,7 +8,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Star from '@material-ui/icons/Star';
 
-const cardWidth = 400;
+const cardWidth = 350;
 
 const useStyles = makeStyles((theme) => ({
   bingoTable: {
@@ -35,7 +35,8 @@ const useStyles = makeStyles((theme) => ({
     padding: '0px',
   },
   bingoCell: {
-    fontSize: '12px',
+    fontSize: '10px',
+    fontWeight: '600',
     width: `${cardWidth / 5}px`,
     height: `${cardWidth / 5}px`,
     display: 'flex',

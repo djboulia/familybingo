@@ -136,7 +136,7 @@ export default function Card(props) {
             textAlign: 'center' // this does the magic
           }}>
           <Button color='secondary' variant='contained' href={'/games/' + gameid + '/round/' + roundid}>
-            View The Round
+            View Round Status
             </Button>
         </Grid>
 
