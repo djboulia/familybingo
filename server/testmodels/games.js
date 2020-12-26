@@ -1,20 +1,20 @@
 
 'use strict';
 
-const DBHelper = require('./dbhelper');
+const FileDB = require('./utils/filedb');
 
-module.exports = function (cloudant) {
-
-    const db = cloudant.db.use('familybingo')
+module.exports = function(path) {
+    const FILE = path + '/games.json';
+    const fileDB = new FileDB(FILE);
 
     this.getById = function (gameid) {
-        return DBHelper.getById(db, gameid);
+        return fileDB.getById(gameid);
     }
 
     this.getByUser = function (id) {
         return new Promise((resolve, reject) => {
 
-            DBHelper.getAll(db, "game")
+            fileDB.getAll()
                 .then((games) => {
                     const result = [];
 
@@ -46,11 +46,31 @@ module.exports = function (cloudant) {
     }
 
     this.update = function (game) {
-        return DBHelper.update(db, game);
+        return new Promise((resolve, reject) => {
+
+            fileDB.update(game)
+                .then((game) => {
+                    resolve(game);
+                })
+                .catch((e) => {
+                    reject(e);
+                })
+        })
     }
 
     this.create = function (gameData) {
-        return DBHelper.create(db, 'game', gameData);
+        return new Promise((resolve, reject) => {
+
+            gameData.class = 'game';
+
+            fileDB.create(gameData)
+                .then((result) => {
+                    resolve(result);
+                })
+                .catch((e) => {
+                    reject(e);
+                })
+        })
     }
 
 };

@@ -68,7 +68,7 @@ export default function Round(props) {
         </Grid>
 
         {game.players.map((player) => (
-          <Grid key={player.id} item>
+          <Grid key={player._id} item>
             <BingoCardSmall player={player} />
           </Grid>
         ))}

@@ -66,7 +66,7 @@ export default function Games() {
 
         <TableBody>
           {games.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow key={row._id}>
               <TableCell>
                 {row.name}
               </TableCell>
@@ -74,7 +74,7 @@ export default function Games() {
                 {(row.complete) ? 'Complete' : 'In Progress'}
               </TableCell>
               <TableCell align='center'>
-                <Button color='primary' variant='contained' href={'/games/' + row.id}>
+                <Button color='primary' variant='contained' href={'/games/' + row._id}>
                   View Game
                 </Button>
               </TableCell>

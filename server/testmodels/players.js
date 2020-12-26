@@ -1,41 +1,36 @@
 
 'use strict';
 
-const DBHelper = require('./dbhelper');
+const FileDB = require('./utils/filedb');
 
-module.exports = function (cloudant) {
+const findPlayerByUserid = function (players, userid) {
+    return new Promise((resolve, reject) => {
+        for (let i = 0; i < players.length; i++) {
+            const player = players[i];
+            if (player.userid === userid) {
+                resolve(player);
+                return;
+            }
+        }
 
-    const db = cloudant.db.use('familybingo')
+        reject('player ' + userid + ' not found!');
+    })
+}
+
+module.exports = function(path) {
+    const FILE = path + '/players.json';
+    const fileDB = new FileDB(FILE);
 
     this.getAll = function () {
-        return DBHelper.getAll(db, "player");
+        return fileDB.getAll();
     }
 
     this.getById = function (id) {
-        return DBHelper.getById(db, id);
-    }
-
-    this.getByUserid = function (userid) {
-        return new Promise((resolve, reject) => {
-            db.find({ selector: { class: "player", userid: userid } }, function (err, result) {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-
-                console.log('Found documnts with id ');
-                for (var i = 0; i < result.docs.length; i++) {
-                    console.log('  Doc id: %s', result.docs[i]._id);
-                }
-
-                resolve(result.docs[0]);
-            });
-        })
+        return fileDB.getById(id);
     }
 
     this.authenticate = function (userid, password) {
         const err = 'Invalid userid or password';
-        const self = this;
 
         return new Promise((resolve, reject) => {
             if (!userid || !password) {
@@ -43,7 +38,10 @@ module.exports = function (cloudant) {
                 return;
             }
 
-            self.getByUserid(userid)
+            fileDB.getAll()
+                .then((players) => {
+                    return findPlayerByUserid(players, userid);
+                })
                 .then((player) => {
                     if (player.password !== password) {
                         reject(err);
@@ -60,7 +58,7 @@ module.exports = function (cloudant) {
                     resolve(result);
                 })
                 .catch((e) => {
-                    reject(e);
+                    reject(err);
                     return;
                 })
         })

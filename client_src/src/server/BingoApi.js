@@ -215,7 +215,7 @@ const BingoApi = {
     },
 
     cardUpdate(id, card) {
-        const cardid = card.id;
+        const cardid = card._id;
 
         return new Promise((resolve, reject) => {
 

@@ -1,9 +1,8 @@
 
 'use strict';
 
-const { resolve } = require('path');
+const FileDB = require('./utils/filedb');
 const BingoCard = require('../utils/bingocard');
-const DBHelper = require('./dbhelper');
 
 const findCard = function (id, cards) {
     for (let i = 0; i < cards.length; i++) {
@@ -19,20 +18,19 @@ const findCard = function (id, cards) {
     return undefined;
 }
 
-module.exports = function (cloudant) {
+module.exports = function (path) {
 
-    const db = cloudant.db.use('familybingo')
+    const FILE = path + '/cards.json';
+    const fileDB = new FileDB(FILE);
 
     this.getById = function (id) {
         return new Promise((resolve, reject) => {
             const result = [];
 
-            DBHelper.getById(db, id)
+            fileDB.getById(id)
                 .then((card) => {
                     resolve({
                         _id: id,
-                        _rev: card._rev,
-                        class: card.class,
                         rows: BingoCard.updateBingoCard(card.rows)
                     });
                     return;
@@ -46,7 +44,7 @@ module.exports = function (cloudant) {
 
     this.getIds = function (ids) {
         return new Promise((resolve, reject) => {
-            DBHelper.getAll(db, 'card')
+            fileDB.getAll()
                 .then((cards) => {
                     const results = [];
 
@@ -70,20 +68,17 @@ module.exports = function (cloudant) {
         })
     }
 
+
     this.update = function (card) {
         return new Promise((resolve, reject) => {
 
-            DBHelper.update(db, {
+            fileDB.update({
                 _id: card._id,
-                _rev: card._rev,
-                class: card.class,
                 rows: BingoCard.getCardData(card.rows)
             })
                 .then((card) => {
                     resolve({
                         _id: card._id,
-                        _rev: card._rev,
-                        class: card.class,
                         rows: BingoCard.updateBingoCard(card.rows)
                     });
                 })
@@ -94,7 +89,19 @@ module.exports = function (cloudant) {
     }
 
     this.create = function (cardData) {
-        return DBHelper.create(db, 'card', cardData);
+        return new Promise((resolve, reject) => {
+
+            cardData.class = 'card';
+
+            fileDB.create(cardData)
+                .then((card) => {
+                    resolve(card);
+                })
+                .catch((e) => {
+                    reject(e);
+                })
+
+        })
     }
 
 };

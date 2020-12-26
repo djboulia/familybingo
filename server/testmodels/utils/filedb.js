@@ -36,7 +36,7 @@ const FileDB = function (filename) {
 
     this.getAll = function () {
         return new Promise((resolve, reject) => {
-            resolve(contents);
+            resolve(JSON.parse(JSON.stringify(contents))); // return a copy
         })
     };
 
@@ -47,8 +47,8 @@ const FileDB = function (filename) {
             for (let i = 0; i < contents.length; i++) {
                 const entry = contents[i];
 
-                if (entry.id === id) {
-                    resolve(entry);
+                if (entry._id === id) {
+                    resolve(JSON.parse(JSON.stringify(entry))); // return a copy
                     return;
                 }
             }
@@ -92,7 +92,7 @@ const FileDB = function (filename) {
             for (let i = 0; i < contents.length; i++) {
                 const entry = contents[i];
 
-                if (entry.id === updateEntry.id) {
+                if (entry._id === updateEntry._id) {
                     contents[i] = JSON.parse(JSON.stringify(updateEntry));
 
                     rewriteDB(contents)
@@ -107,7 +107,7 @@ const FileDB = function (filename) {
                 }
             }
 
-            reject('could not find id ' + id);
+            reject('could not find id ' + updateEntry._id);
         })
     }
 
@@ -124,7 +124,7 @@ const FileDB = function (filename) {
             const id = now.getTime().toString();
 
             const entry = JSON.parse(JSON.stringify(entryData));
-            entry.id = id;
+            entry._id = id;
 
             console.log('creating ' + JSON.stringify(entry));
 

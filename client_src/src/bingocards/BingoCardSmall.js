@@ -62,7 +62,7 @@ export default function BingCardSmall(props) {
   const card = player.card;
 
   return (
-    <Table key={player.id} className={classes.bingoTable}>
+    <Table key={player._id} className={classes.bingoTable}>
 
       <TableHead>
         <TableRow >

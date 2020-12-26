@@ -1,15 +1,12 @@
-
 'use strict';
 
-require("dotenv").config();
+const DBHelper = require('./dbhelper');
 
-const FileDB = require('./utils/filedb');
+module.exports = function (cloudant) {
 
-const FILE = process.env.TEST_DATA_PATH + '/topics.json';
-const fileDB = new FileDB(FILE);
+    const db = cloudant.db.use('familybingo')
 
-module.exports = {
-    getById: function (id) {
-        return fileDB.getById(id);
-    },
+    this.getById = function (id) {
+        return DBHelper.getById(db, id);
+    }
 };

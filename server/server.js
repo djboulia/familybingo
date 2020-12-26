@@ -11,16 +11,26 @@ const bodyParser = require('body-parser');
 
 require("dotenv").config();
 
-var Players = require('./models/players');
-var Games = require('./models/games');
-var Cards = require('./models/cards');
+const DBLoader = function (modulePath, dataPath) {
+    const module = require(modulePath);
+    return new module(dataPath);
+}
 
-var client_url = (process.env.CLIENT_URL) ? process.env.CLIENT_URL : ""; // 'http://localhost:3000';
-var server_url = (process.env.SERVER_URL) ? process.env.SERVER_URL : ""; // 'http://localhost:8888';
+const TEST_DATA_PATH = process.env.TEST_DATA_PATH;
 
-console.log("server_url ", server_url);
-console.log("client_url ", client_url);
+var Cloudant = require('@cloudant/cloudant');
 
+var me = process.env.CLOUDANT_USERNAME;
+var password = process.env.CLOUDANT_PASSWORD;
+
+var cloudant = Cloudant({ account: me, password: password });
+
+// const Players = DBLoader('./testmodels/players', TEST_DATA_PATH);
+// const Games = DBLoader('./testmodels/games', TEST_DATA_PATH);
+// const Cards = DBLoader('./testmodels/cards', TEST_DATA_PATH);
+const Players = DBLoader('./models/players', cloudant);
+const Games = DBLoader('./models/games', cloudant);
+const Cards = DBLoader('./models/cards', cloudant);
 
 const app = express();
 
@@ -97,7 +107,7 @@ app.get('/api/bingo/user/me/games', function (req, res) {
         return;
     }
 
-    Games.getByUser(user.id)
+    Games.getByUser(user._id)
         .then((result) => {
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({
@@ -119,6 +129,33 @@ app.get('/api/bingo/user/me/games', function (req, res) {
 });
 
 /**
+ * Get all of the cards for this user in this game
+ * 
+ * @param {String} gameid 
+ * @param {String} userid 
+ */
+const getAllCardIds = function (game, userid) {
+    const rounds = game.rounds;
+    const result = [];
+
+    for (let i = 0; i < rounds.length; i++) {
+        const round = rounds[i];
+        result[i] = undefined;
+
+        for (let j = 0; j < round.length; j++) {
+            const card = round[j];
+
+            if (card.user === userid) {
+                const cardid = card.card;
+                result[i] = cardid;
+            }
+        }
+    }
+
+    return result;
+}
+
+/**
  * get a specific user's game cards
  */
 app.get('/api/bingo/user/me/game/:gameid/cards', function (req, res) {
@@ -136,8 +173,9 @@ app.get('/api/bingo/user/me/game/:gameid/cards', function (req, res) {
 
     console.log('found game id ' + gameid);
 
-    Games.getAllCardIds(gameid, user.id)
-        .then((results) => {
+    Games.getById(gameid)
+        .then((game) => {
+            const results = getAllCardIds(game, user._id);
             const cards = [];
 
             for (let i = 0; i < results.length; i++) {
@@ -193,8 +231,9 @@ app.get('/api/bingo/user/me/game/:gameid/cards/round/:roundid', function (req, r
 
     console.log('found game id ' + gameId + ' and round id ' + roundId);
 
-    Games.getAllCardIds(gameId, user.id)
-        .then((results) => {
+    Games.getById(gameId)
+        .then((game) => {
+            const results = getAllCardIds(game, user._id);
 
             if (roundId >= results.length) {
                 throw 'Invalid round id!';
@@ -369,7 +408,7 @@ app.get('/api/bingo/game/:id', function (req, res) {
 
     Games.getById(id)
         .then((result) => {
-            gameSummary.id = result.id;
+            gameSummary._id = result._id;
             gameSummary.name = result.name;
             gameSummary.complete = result.complete;
             gameSummary.activeRound = result.activeRound;
@@ -395,42 +434,47 @@ app.get('/api/bingo/game/:id', function (req, res) {
         })
 });
 
-const getPlayerAndCard = function (gameid, playerId, roundId) {
-    return new Promise((resolve, reject) => {
-        const result = {};
+const getPlayerAndCard = function (player, card) {
+    const result = {};
 
-        console.log('player ' + playerId);
+    console.log('player ' + player._id);
 
-        Players.getById(playerId)
-            .then((playerData) => {
-                result.name = playerData.name;
-                result.id = playerData.id;
+    result.name = player.name;
+    result._id = player._id;
+    result.card = card;
 
-                return Games.getAllCardIds(gameid, playerData.id)
-            })
-            .then((cardIds) => {
+    return result;
+}
 
-                console.log('cardids: ', cardIds);
+const findCardId = function (game, player, roundId) {
 
-                for (let i = 0; i < cardIds.length; i++) {
-                    const cardid = cardIds[i];
+    console.log('player ' + player._id);
 
-                    if (i.toString() === roundId) {
-                        return Cards.getById(cardid);
-                    }
-                }
+    const cardIds = getAllCardIds(game, player._id)
 
-                throw 'Round ' + roundId + ' doesnt exist!';
-            })
-            .then((card) => {
-                result.card = card;
+    console.log('cardids: ', cardIds);
 
-                resolve(result);
-            })
-            .catch((err) => {
-                reject(err);
-            })
-    })
+    for (let i = 0; i < cardIds.length; i++) {
+
+        if (i.toString() === roundId) {
+            const cardid = cardIds[i];
+            return cardIds[i];
+        }
+    }
+
+    console.log('Error: could not find roundId ' + roundId);
+    return undefined;
+}
+
+const findPlayer = function (players, id) {
+    for (let i = 0; i < players.length; i++) {
+        const player = players[i];
+        if (player._id === id) {
+            return player;
+        }
+    }
+
+    return undefined;
 }
 
 /**
@@ -441,30 +485,55 @@ app.get('/api/bingo/game/:id/round/:roundid', function (req, res) {
     const id = req.params.id;
     const roundId = req.params.roundid;
     const gameSummary = {};
+    let game = undefined;
 
     console.log('game id ' + id + ' roundId ' + roundId);
 
     Games.getById(id)
         .then((result) => {
-            gameSummary.id = result.id;
-            gameSummary.name = result.name;
+            game = result;
+
+            gameSummary._id = game._id;
+            gameSummary.name = game.name;
             gameSummary.round = roundId;
 
+            return Players.getAll();
+        })
+        .then((allPlayers) => {
+            game.allPlayers = allPlayers;
+
             // go get all the player and card data
-            const players = result.players;
-            const promises = [];
+            const players = game.players;
+            const cardIds = [];
 
             for (let i = 0; i < players.length; i++) {
-                const player = players[i];
+                const playerId = players[i];
 
-                promises.push(getPlayerAndCard(id, player, roundId));
+                const player = findPlayer(allPlayers, playerId);
+                cardIds.push(findCardId(game, player, roundId));
             }
 
-            return Promise.all(promises);
+            return Cards.getIds(cardIds);
         })
-        .then((results) => {
-            gameSummary.players = results;
+        .then((cards) => {
             console.log('gameSummary ', gameSummary);
+
+            const allPlayers = game.allPlayers;
+            const players = game.players;
+            const results = [];
+
+            if (cards.length != players.length) {
+                throw 'Error! Expected same size for cards';
+            }
+
+            for (let i = 0; i < players.length; i++) {
+                const playerId = players[i];
+
+                const player = findPlayer(allPlayers, playerId);
+                results.push(getPlayerAndCard(player, cards[i]))
+            }
+
+            gameSummary.players = results;
 
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({
@@ -474,6 +543,8 @@ app.get('/api/bingo/game/:id/round/:roundid', function (req, res) {
             }));
         })
         .catch((e) => {
+            console.log('Error: ', e);
+
             const err = {
                 status: false,
                 msg: e

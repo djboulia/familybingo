@@ -32,7 +32,7 @@ export default function Card(props) {
 
     BingoApi.card(gameid, roundid)
       .then((card) => {
-        console.log('found card ' + card.id);
+        console.log('found card ' + card._id);
         setCard(card);
 
         return BingoApi.game(gameid)

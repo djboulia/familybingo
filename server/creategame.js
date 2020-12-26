@@ -5,10 +5,28 @@
 
 require("dotenv").config();
 
-var Players = require('./models/players');
-var Topics = require('./models/topics');
-var Games = require('./models/games');
-var Cards = require('./models/cards');
+const DBLoader = function(modulePath, dataPath) {
+    const module = require(modulePath);
+    return new module(dataPath);    
+}
+
+const TEST_DATA_PATH = process.env.TEST_DATA_PATH;
+// const Players = DBLoader('./testmodels/players', TEST_DATA_PATH);
+// const Games = DBLoader('./testmodels/games', TEST_DATA_PATH);
+// const Cards = DBLoader('./testmodels/cards', TEST_DATA_PATH);
+// const Topics = DBLoader('./testmodels/topics', TEST_DATA_PATH);
+
+var Cloudant = require('@cloudant/cloudant');
+ 
+var me = process.env.CLOUDANT_USERNAME;
+var password = process.env.CLOUDANT_PASSWORD;
+
+var cloudant = Cloudant({ account: me, password: password });
+
+const Players = DBLoader('./models/players', cloudant);
+const Games = DBLoader('./models/games', cloudant);
+const Cards = DBLoader('./models/cards', cloudant);
+const Topics = DBLoader('./models/topics', cloudant);
 
 const results = {};
 
@@ -66,7 +84,7 @@ const newCard = function (topic) {
 // create the game with the players and cards
 
 const game = {
-    name: 'SuperBowl Test',
+    name: 'Christa-mas 2020',
     startDate: new Date().toString(),
     endDate: new Date().toString(),
     players: [],
@@ -82,11 +100,11 @@ Players.getAll()
         results.players = players;
 
         // figure out which topics (content) to use
-        return Topics.getById('1234');
+        return Topics.getById('250e77f28e2a0240932fd56247060d4e');
     })
     .then((topic) => {
         results.topic = topic;
-        game.topic = topic.id;
+        game.topic = topic._id;
 
         // create bingo cards for each player
         const promises = [];
@@ -108,9 +126,11 @@ Players.getAll()
             const player = cards[i].player;
             const card = cards[i].card;
 
+            console.log('card ' , card);
+
             round.push({
-                user: player.id,
-                card: card.id
+                user: player._id,
+                card: card._id
             })
         }
 
@@ -134,7 +154,7 @@ Players.getAll()
         const players = results.players;
         for (let i = 0; i < players.length; i++) {
             const player = players[i];
-            const playerId = player.id;
+            const playerId = player._id;
 
             game.players.push(playerId)
         }
@@ -147,8 +167,8 @@ Players.getAll()
             const card = cards[i].card;
 
             round.push({
-                user: player.id,
-                card: card.id
+                user: player._id,
+                card: card._id
             })
         }
 
@@ -177,8 +197,8 @@ Players.getAll()
             const card = cards[i].card;
 
             round.push({
-                user: player.id,
-                card: card.id
+                user: player._id,
+                card: card._id
             })
         }
 

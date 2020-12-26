@@ -45,7 +45,7 @@ export default function Game(props) {
   const rounds = [];
   for (let i = 0; i < game.totalRounds; i++) {
     rounds.push({
-      id: i,
+      index: i,
       round: i + 1,
       status: (game.complete) ? 'Complete' : (i < activeRound) ? 'Complete' : (i === activeRound) ? 'Active' : 'Not Started',
     })
@@ -69,7 +69,7 @@ export default function Game(props) {
 
         <TableBody>
           {rounds.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow key={row.index}>
               <TableCell>
                 {row.round}
               </TableCell>
@@ -77,12 +77,12 @@ export default function Game(props) {
                 {row.status}
               </TableCell>
               <TableCell align='center'>
-                <Button color='primary' disabled={row.status === 'Not Started'} variant='contained' href={'/games/' + game.id + '/cards/round/' + row.id}>
+                <Button color='primary' disabled={row.status === 'Not Started'} variant='contained' href={'/games/' + game._id + '/cards/round/' + row.index}>
                   My Card
                 </Button>
               </TableCell>
               <TableCell align='center'>
-                <Button color='primary' disabled={row.status === 'Not Started'} variant='contained' href={'/games/' + game.id + '/round/' + row.id}>
+                <Button color='primary' disabled={row.status === 'Not Started'} variant='contained' href={'/games/' + game._id + '/round/' + row.index}>
                   View Round
                 </Button>
               </TableCell>
