@@ -3,28 +3,12 @@
  *
  */
 
-require("dotenv").config();
+const Config = require('./config');
 
-const DBLoader = function (modulePath, dataPath) {
-    const module = require(modulePath);
-    return new module(dataPath);
-}
-
-const TEST_DATA_PATH = process.env.TEST_DATA_PATH;
-
-var Cloudant = require('@cloudant/cloudant');
-
-var me = process.env.CLOUDANT_USERNAME;
-var password = process.env.CLOUDANT_PASSWORD;
-
-var cloudant = Cloudant({ account: me, password: password });
-
-// const Players = DBLoader('./testmodels/players', TEST_DATA_PATH);
-const Players = DBLoader('./models/players', cloudant);
-const Games = DBLoader('./testmodels/games', TEST_DATA_PATH);
-const Cards = DBLoader('./testmodels/cards', TEST_DATA_PATH);
-// const Topics = DBLoader('./testmodels/topics', TEST_DATA_PATH);
-const Topics = DBLoader('./models/topics', cloudant);
+const Players = Config.loadModel('player');
+const Games = Config.loadModel('game');
+const Cards = Config.loadModel('card');
+const Topics = Config.loadModel('topic');
 
 const results = {};
 

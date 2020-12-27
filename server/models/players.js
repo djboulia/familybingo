@@ -1,35 +1,29 @@
 
 'use strict';
 
-const DBHelper = require('./dbhelper');
-
-module.exports = function (cloudant) {
-
-    const db = cloudant.db.use('familybingo')
+module.exports = function (db) {
 
     this.getAll = function () {
-        return DBHelper.getAll(db, "player");
+        return db.getAll();
     }
 
     this.getById = function (id) {
-        return DBHelper.getById(db, id);
+        return db.getById(id);
     }
 
     this.getByUserid = function (userid) {
         return new Promise((resolve, reject) => {
-            db.find({ selector: { class: "player", userid: userid } }, function (err, result) {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-
-                console.log('Found documnts with id ');
-                for (var i = 0; i < result.docs.length; i++) {
-                    console.log('  Doc id: %s', result.docs[i]._id);
-                }
-
-                resolve(result.docs[0]);
-            });
+            db.findFields({ userid: userid })
+                .then((results) => {
+                    if (results.length > 0) {
+                        resolve(results[0]);
+                    } else {
+                        reject('Userid ' + userid + ' not found');
+                    }
+                })
+                .catch((e) => {
+                    reject(e);
+                });
         })
     }
 

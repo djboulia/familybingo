@@ -11,26 +11,11 @@ const bodyParser = require('body-parser');
 
 require("dotenv").config();
 
-const DBLoader = function (modulePath, dataPath) {
-    const module = require(modulePath);
-    return new module(dataPath);
-}
+const Config = require('./config');
 
-const TEST_DATA_PATH = process.env.TEST_DATA_PATH;
-
-var Cloudant = require('@cloudant/cloudant');
-
-var me = process.env.CLOUDANT_USERNAME;
-var password = process.env.CLOUDANT_PASSWORD;
-
-var cloudant = Cloudant({ account: me, password: password });
-
-// const Players = DBLoader('./testmodels/players', TEST_DATA_PATH);
-// const Games = DBLoader('./testmodels/games', TEST_DATA_PATH);
-// const Cards = DBLoader('./testmodels/cards', TEST_DATA_PATH);
-const Players = DBLoader('./models/players', cloudant);
-const Games = DBLoader('./models/games', cloudant);
-const Cards = DBLoader('./models/cards', cloudant);
+const Players = Config.loadModel('player');
+const Games = Config.loadModel('game');
+const Cards = Config.loadModel('card');
 
 const app = express();
 

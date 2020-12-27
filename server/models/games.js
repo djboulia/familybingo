@@ -1,20 +1,16 @@
 
 'use strict';
 
-const DBHelper = require('./dbhelper');
-
-module.exports = function (cloudant) {
-
-    const db = cloudant.db.use('familybingo')
+module.exports = function (db) {
 
     this.getById = function (gameid) {
-        return DBHelper.getById(db, gameid);
+        return db.getById(gameid);
     }
 
     this.getByUser = function (id) {
         return new Promise((resolve, reject) => {
 
-            DBHelper.getAll(db, "game")
+            db.getAll()
                 .then((games) => {
                     const result = [];
 
@@ -46,11 +42,11 @@ module.exports = function (cloudant) {
     }
 
     this.update = function (game) {
-        return DBHelper.update(db, game);
+        return db.update(game);
     }
 
     this.create = function (gameData) {
-        return DBHelper.create(db, 'game', gameData);
+        return db.create(gameData);
     }
 
 };

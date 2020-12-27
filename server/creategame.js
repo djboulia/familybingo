@@ -3,30 +3,12 @@
  *
  */
 
-require("dotenv").config();
+const Config = require('./config');
 
-const DBLoader = function(modulePath, dataPath) {
-    const module = require(modulePath);
-    return new module(dataPath);    
-}
-
-const TEST_DATA_PATH = process.env.TEST_DATA_PATH;
-// const Players = DBLoader('./testmodels/players', TEST_DATA_PATH);
-// const Games = DBLoader('./testmodels/games', TEST_DATA_PATH);
-// const Cards = DBLoader('./testmodels/cards', TEST_DATA_PATH);
-// const Topics = DBLoader('./testmodels/topics', TEST_DATA_PATH);
-
-var Cloudant = require('@cloudant/cloudant');
- 
-var me = process.env.CLOUDANT_USERNAME;
-var password = process.env.CLOUDANT_PASSWORD;
-
-var cloudant = Cloudant({ account: me, password: password });
-
-const Players = DBLoader('./models/players', cloudant);
-const Games = DBLoader('./models/games', cloudant);
-const Cards = DBLoader('./models/cards', cloudant);
-const Topics = DBLoader('./models/topics', cloudant);
+const Players = Config.loadModel('player');
+const Games = Config.loadModel('game');
+const Cards = Config.loadModel('card');
+const Topics = Config.loadModel('topic');
 
 const results = {};
 
@@ -100,7 +82,8 @@ Players.getAll()
         results.players = players;
 
         // figure out which topics (content) to use
-        return Topics.getById('250e77f28e2a0240932fd56247060d4e');
+        // return Topics.getById('250e77f28e2a0240932fd56247060d4e');
+        return Topics.getById('1234');
     })
     .then((topic) => {
         results.topic = topic;
@@ -209,4 +192,7 @@ Players.getAll()
     })
     .then((game) => {
         console.log('game created');
+    })
+    .catch((e) => {
+        console.log('error ' , e);
     })

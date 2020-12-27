@@ -1,9 +1,7 @@
 
 'use strict';
 
-const { resolve } = require('path');
 const BingoCard = require('../utils/bingocard');
-const DBHelper = require('./dbhelper');
 
 const findCard = function (id, cards) {
     for (let i = 0; i < cards.length; i++) {
@@ -19,15 +17,13 @@ const findCard = function (id, cards) {
     return undefined;
 }
 
-module.exports = function (cloudant) {
-
-    const db = cloudant.db.use('familybingo')
+module.exports = function (db) {
 
     this.getById = function (id) {
         return new Promise((resolve, reject) => {
             const result = [];
 
-            DBHelper.getById(db, id)
+            db.getById(id)
                 .then((card) => {
                     resolve({
                         _id: id,
@@ -46,7 +42,7 @@ module.exports = function (cloudant) {
 
     this.getIds = function (ids) {
         return new Promise((resolve, reject) => {
-            DBHelper.getAll(db, 'card')
+            db.getAll()
                 .then((cards) => {
                     const results = [];
 
@@ -73,7 +69,7 @@ module.exports = function (cloudant) {
     this.update = function (card) {
         return new Promise((resolve, reject) => {
 
-            DBHelper.update(db, {
+            db.update({
                 _id: card._id,
                 _rev: card._rev,
                 class: card.class,
@@ -94,7 +90,7 @@ module.exports = function (cloudant) {
     }
 
     this.create = function (cardData) {
-        return DBHelper.create(db, 'card', cardData);
+        return db.create(cardData);
     }
 
 };

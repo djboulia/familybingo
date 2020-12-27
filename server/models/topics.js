@@ -1,12 +1,8 @@
 'use strict';
 
-const DBHelper = require('./dbhelper');
-
-module.exports = function (cloudant) {
-
-    const db = cloudant.db.use('familybingo')
+module.exports = function (db) {
 
     this.getById = function (id) {
-        return DBHelper.getById(db, id);
+        return db.getById(id);
     }
 };

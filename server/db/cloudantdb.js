@@ -1,6 +1,34 @@
-module.exports = {
+/**
+ * Cloudant front end to abstract the db details
+ * 
+ * @param {Object} cloudant configured Cloudant object
+ * @param {String} dbName database name to use
+ */
+const CloudantDB = function (cloudant, dbName, className) {
+    const db = cloudant.db.use(dbName)
 
-    getById: function (db, id) {
+    this.findFields = function (fields) {
+        return new Promise((resolve, reject) => {
+            fields.class = className;
+
+            db.find({ selector: fields }, function (err, result) {
+                if (err) {
+                    console.log('db.find error: ', err);
+                    reject(err);
+                    return;
+                }
+
+                console.log('Found documents with id ');
+                for (var i = 0; i < result.docs.length; i++) {
+                    console.log('  Doc id: %s', result.docs[i]._id);
+                }
+
+                resolve(result.docs);
+            });
+        });
+    }
+
+    this.getById = function (id) {
         return new Promise((resolve, reject) => {
             db.find({ selector: { _id: id } }, function (err, result) {
                 if (err) {
@@ -22,9 +50,9 @@ module.exports = {
                 resolve(result.docs[0]);
             });
         })
-    },
+    }
 
-    getAll: function (db, className) {
+    this.getAll = function () {
         return new Promise((resolve, reject) => {
             db.find({ selector: { class: className } }, function (err, result) {
                 if (err) {
@@ -40,9 +68,9 @@ module.exports = {
                 resolve(result.docs);
             });
         })
-    },
+    }
 
-    update: function (db, record) {
+    this.update = function (record) {
         return new Promise((resolve, reject) => {
 
             if (!record._rev) {
@@ -66,9 +94,9 @@ module.exports = {
                     reject(e);
                 })
         })
-    },
+    }
 
-    create: function (db, className, record) {
+    this.create = function (record) {
         return new Promise((resolve, reject) => {
 
             record.class = className;
@@ -90,3 +118,5 @@ module.exports = {
     }
 
 };
+
+module.exports = CloudantDB;

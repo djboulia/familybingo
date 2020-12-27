@@ -19,20 +19,61 @@ const writeFile = function (filename, contents) {
     })
 }
 
+const fieldsMatch = function (record, fields) {
+    for (var name in fields) {
+        if (fields.hasOwnProperty(name)) {
+            if (fields[name] != record[name]) {
+                console.log('field ' + name + ' does not match: ' + fields[name] + ', ' + record[name]);
+                return false;
+            }
+        }
+    }
+
+    console.log('found match: ', record);
+    return true;
+}
 
 /**
  * Simple file based database mock up.  Useful for prototyping
  * and setting up a data model before committing to a true
  * database.
  * 
- * @param {String} filename 
+ * @param {String} path 
+ * @param {String} className 
  */
-const FileDB = function (filename) {
+const FileDB = function (path, className) {
+
+    const filename = path + '/' + className + '.json';
 
     const rawdata = fs.readFileSync(filename);
     let contents = JSON.parse(rawdata);
     console.log(contents);
 
+    this.findFields = function (fields) {
+        const self = this;
+
+        return new Promise((resolve, reject) => {
+
+            const matches = [];
+
+            self.getAll()
+                .then((results) => {
+
+                    for (let i = 0; i < results.length; i++) {
+                        const result = results[i];
+
+                        if (fieldsMatch(result, fields)) {
+                            matches.push(result);
+                        }
+                    }
+
+                    resolve(matches);
+                })
+                .catch((e) => {
+                    reject(e);
+                })
+        });
+    }
 
     this.getAll = function () {
         return new Promise((resolve, reject) => {
@@ -54,7 +95,6 @@ const FileDB = function (filename) {
             }
 
             reject('could not find id ' + id);
-
         })
     }
 
@@ -125,6 +165,7 @@ const FileDB = function (filename) {
 
             const entry = JSON.parse(JSON.stringify(entryData));
             entry._id = id;
+            entry.class = className;
 
             console.log('creating ' + JSON.stringify(entry));
 
