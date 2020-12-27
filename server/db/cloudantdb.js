@@ -4,6 +4,21 @@
  * @param {Object} cloudant configured Cloudant object
  * @param {String} dbName database name to use
  */
+
+const findById = function (id, records) {
+    for (let i = 0; i < records.length; i++) {
+        const record = records[i];
+
+        if (record._id === id) {
+            return record;
+        }
+    }
+
+    console.log('Error: could not find id ' + id);
+    console.log('Records:  ', records);
+    return undefined;
+}
+
 const CloudantDB = function (cloudant, dbName, className) {
     const db = cloudant.db.use(dbName)
 
@@ -89,6 +104,34 @@ const CloudantDB = function (cloudant, dbName, className) {
                     } else {
                         reject(result.ok);
                     }
+                })
+                .catch((e) => {
+                    reject(e);
+                })
+        })
+    }
+
+    /**
+     * Get multiple records by id in one call
+     * 
+     * @param {Array} ids an array of ids to search for
+     */
+    this.getIds = function (ids) {
+        const self = this;
+
+        return new Promise((resolve, reject) => {
+            self.getAll()
+                .then((records) => {
+                    const results = [];
+
+                    for (let i = 0; i < ids.length; i++) {
+                        const id = ids[i];
+
+                        const record = findById(id, records);
+                        results.push(record);
+                    }
+
+                    resolve(results);
                 })
                 .catch((e) => {
                     reject(e);

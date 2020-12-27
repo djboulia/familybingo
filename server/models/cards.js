@@ -3,20 +3,6 @@
 
 const BingoCard = require('../utils/bingocard');
 
-const findCard = function (id, cards) {
-    for (let i = 0; i < cards.length; i++) {
-        const card = cards[i];
-
-        if (card._id === id) {
-            return card;
-        }
-    }
-
-    console.log('Error: could not find id ' + id);
-    console.log('Cards:  ', cards);
-    return undefined;
-}
-
 module.exports = function (db) {
 
     this.getById = function (id) {
@@ -42,14 +28,13 @@ module.exports = function (db) {
 
     this.getIds = function (ids) {
         return new Promise((resolve, reject) => {
-            db.getAll()
+            db.getIds(ids)
                 .then((cards) => {
                     const results = [];
 
-                    for (let i = 0; i < ids.length; i++) {
-                        const id = ids[i];
+                    for (let i = 0; i < cards.length; i++) {
+                        const card = cards[i];
 
-                        const card = findCard(id, cards);
                         results.push({
                             _id: card._id,
                             _rev: card._rev,

@@ -33,10 +33,24 @@ const fieldsMatch = function (record, fields) {
     return true;
 }
 
+const findById = function (id, records) {
+    for (let i = 0; i < records.length; i++) {
+        const record = records[i];
+
+        if (record._id === id) {
+            return record;
+        }
+    }
+
+    console.log('Error: could not find id ' + id);
+    console.log('Records:  ', records);
+    return undefined;
+}
+
 /**
  * Simple file based database mock up.  Useful for prototyping
  * and setting up a data model before committing to a true
- * database.
+ * database.  NOT meant for production environments!
  * 
  * @param {String} path 
  * @param {String} className 
@@ -148,6 +162,34 @@ const FileDB = function (path, className) {
             }
 
             reject('could not find id ' + updateEntry._id);
+        })
+    }
+
+    /**
+     * Get multiple records by id in one call
+     * 
+     * @param {Array} ids an array of ids to search for
+     */
+    this.getIds = function (ids) {
+        const self = this;
+
+        return new Promise((resolve, reject) => {
+            self.getAll()
+                .then((records) => {
+                    const results = [];
+
+                    for (let i = 0; i < ids.length; i++) {
+                        const id = ids[i];
+
+                        const record = findById(id, records);
+                        results.push(record);
+                    }
+
+                    resolve(results);
+                })
+                .catch((e) => {
+                    reject(e);
+                })
         })
     }
 
