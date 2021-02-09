@@ -2,21 +2,14 @@
 
 const fs = require('fs');
 
-const writeFile = function (filename, contents) {
-    return new Promise((resolve, reject) => {
-        const data = JSON.stringify(contents, null, 2);
+const writeFileSync = function (filename, contents) {
+    const data = JSON.stringify(contents, null, 2);
 
-        fs.writeFile(filename, data, (err) => {
-            if (err) {
-                console.log('Error: ', err);
-                reject(err);
-                return;
-            }
+    fs.writeFileSync(filename, data);
 
-            console.log('Data written to file');
-            resolve(contents);
-        });
-    })
+    console.log('Data written to file');
+
+    return contents;
 }
 
 const fieldsMatch = function (record, fields) {
@@ -123,13 +116,8 @@ const FileDB = function (path, className) {
         return new Promise((resolve, reject) => {
             contents = newContents;
 
-            writeFile(filename, contents)
-                .then((result) => {
-                    resolve(contents);
-                })
-                .catch((e) => {
-                    reject(e);
-                })
+            const result = writeFileSync(filename, contents);
+            resolve(contents);
         })
     }
 
